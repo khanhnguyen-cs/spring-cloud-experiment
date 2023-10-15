@@ -1,0 +1,29 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: ApiGateway
+  cloud:
+    gateway:
+      routes:
+        - id: studentService
+          uri: lb://StudentService/students
+          predicates:
+            - name: Path
+              args:
+                - pattern: /students/**
+          filters:
+            - AddBasicAuthHeader=khanhn, 1234
+
+        - id: gradeService
+          uri: lb://GradeService/grades
+          predicates:
+            - name: Path
+              args:
+                - pattern: /grades/**
+          filters:
+            - AddBasicAuthHeader=khanhn, 4321
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
