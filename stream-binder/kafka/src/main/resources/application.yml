@@ -1,0 +1,44 @@
+spring:
+  cloud:
+    function:
+      definition: inputDataProducer;inputDataProcessor;numberRouter
+    stream:
+      bindings:
+        inputDataProducer-out-0:
+          group: input-data-producer
+          destination: input-data
+          producer:
+            poller:
+              fixed-delay: 2s
+        inputDataProcessor-in-0:
+          group: input-data-processor
+          destination: input-data
+        inputDataProcessor-out-0:
+          group: input-data-processor
+          destination: input-number
+        numberRouter-in-0:
+          group: number-router
+          destination: input-number
+        numberRouter-out-0:
+          group: number-router
+          destination: unhandled-routing
+      kafka:
+        binder:
+          brokers: localhost:9092
+          consumer-properties:
+            client.id: DemoApp
+            #earliest: automatically reset the offset to the earliest offset
+            #latest: automatically reset the offset to the latest offset
+            auto.offset.reset: earliest
+            group.instance.id: instance
+            auto.commit.interval.ms: 500
+          required-acks: 1
+        bindings:
+          inputDataProcessor-in-0:
+            consumer:
+              ack-mode: manual
+              enable-dlq: true
+              dlq-name: DLQ.input-data
+  kafka:
+    admin:
+      client-id: KafkaDemo
